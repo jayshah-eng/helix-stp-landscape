@@ -289,7 +289,7 @@
 
   <!-- RESULTS BAR -->
   <div class="results-bar">
-    <div class="results-count">Showing <strong id="showing-count">59</strong> of <strong>59</strong> programs</div>
+    <div class="results-count">Showing <strong id="showing-count">0</strong> of <strong id="total-count">0</strong> programs</div>
     <div class="legend">
       <div class="legend-item"><div class="legend-dot" style="background:#1E8A56"></div> Active STP</div>
       <div class="legend-item"><div class="legend-dot" style="background:#2366A8"></div> Strong Candidate</div>
@@ -541,6 +541,7 @@ function render() {
 
   // Update counts
   document.getElementById('showing-count').textContent = filtered.length;
+  document.getElementById('total-count').textContent   = DATA.length;
   document.getElementById('stat-total').textContent    = filtered.length;
   document.getElementById('stat-active').textContent   = filtered.filter(r=>r[7].startsWith('Active')).length;
   document.getElementById('stat-strong').textContent   = filtered.filter(r=>r[7].startsWith('Strong')).length;
