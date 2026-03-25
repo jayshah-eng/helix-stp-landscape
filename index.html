@@ -73,7 +73,7 @@
   .filter-bar {
     background: var(--card); border: 1px solid var(--border); border-radius: 10px;
     padding: 16px 18px; margin-bottom: 18px;
-    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; gap: 12px;
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr auto; gap: 12px;
     align-items: end;
   }
   .filter-group label { display: block; font-size: 11px; font-weight: 600;
@@ -174,6 +174,9 @@
   .area-ini     { background: rgba(232,92,122,0.1); color: #B83055; }
   .area-kidney  { background: rgba(0,107,107,0.1); color: #006B6B; }
   .area-liver   { background: rgba(139,105,20,0.1); color: #7A5C0A; }
+  .area-lsd     { background: rgba(128,0,128,0.08); color: #700070; }
+  .area-skeletal{ background: rgba(180,90,20,0.10); color: #904810; }
+  .area-neurodev{ background: rgba(30,100,180,0.10); color: #1A5AA0; }
 
   .dot-cardio   { background: #1A478A; }
   .dot-metabolic{ background: #2A9E6A; }
@@ -181,6 +184,14 @@
   .dot-ini      { background: #E85C7A; }
   .dot-kidney   { background: #006B6B; }
   .dot-liver    { background: #F0B42A; }
+  .dot-lsd      { background: #9B30FF; }
+  .dot-skeletal { background: #C05A1E; }
+  .dot-neurodev { background: #1A7AC8; }
+
+  /* ── EXOME+ SUPPORT ── */
+  .exome-yes     { color: #1E8A56; font-weight: 600; font-size: 11.5px; }
+  .exome-partial { color: #9A7000; font-weight: 600; font-size: 11.5px; }
+  .exome-no      { color: #888; font-size: 11.5px; }
 </style>
 </head>
 <body>
@@ -259,6 +270,15 @@
       </select>
     </div>
     <div class="filter-group">
+      <label>Exome+ Support</label>
+      <select id="f-exome">
+        <option value="">All</option>
+        <option value="Yes">Yes</option>
+        <option value="Partial">Partial</option>
+        <option value="No">No</option>
+      </select>
+    </div>
+    <div class="filter-group">
       <button class="btn-reset" onclick="resetFilters()">Reset Filters</button>
     </div>
   </div>
@@ -286,6 +306,8 @@
           <th onclick="sortTable(5)">Genetic Target <span class="sort-icon">↕</span></th>
           <th>Target Type</th>
           <th onclick="sortTable(7)">STP Status <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable(8)">Exome+ Support <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable(9)">Dx Partner <span class="sort-icon">↕</span></th>
         </tr>
       </thead>
       <tbody id="table-body"></tbody>
@@ -305,87 +327,121 @@
 <script>
 const DATA = [
   // CARDIOVASCULAR
-  ["Cardiovascular","Familial Hypercholesterolemia","Amgen","Repatha (evolocumab)","Commercial","PCSK9 / LDLR","GOF (PCSK9); LOF (LDLR)","Strong Candidate — FH cascade screening partnerships"],
-  ["Cardiovascular","Familial Hypercholesterolemia","Sanofi / Regeneron","Praluent (alirocumab)","Commercial","PCSK9 / LDLR","GOF (PCSK9); LOF (LDLR)","Strong Candidate — FH advocacy; no formal CDx"],
-  ["Cardiovascular","Familial Hypercholesterolemia","Novartis","Leqvio (inclisiran)","Commercial","PCSK9","GOF target; siRNA silencing","Active STP — FH cascade screening support (HEART-UK)"],
-  ["Cardiovascular","Lipoprotein(a) Elevation","Novartis","Pelacarsen (TQJ230)","Phase 3","LPA","Risk variant (kringle IV-2 repeat)","Strong Candidate — Lp(a) screening programs"],
-  ["Cardiovascular","Lipoprotein(a) Elevation","Amgen","Olpasiran","Phase 3","LPA","Risk variant (rs10455872)","Strong Candidate — Lp(a) testing in trials"],
-  ["Cardiovascular","ATTR Amyloidosis","Pfizer","Vyndaqel / Vyndamax (tafamidis)","Commercial","TTR","Pathogenic variant / wild-type","Active STP — CardioTTRansport program"],
-  ["Cardiovascular","ATTR Amyloidosis","Alnylam","Onpattro / Amvuttra","Commercial","TTR","Pathogenic variant (hereditary hATTR)","Active STP — ActNow program; TTR genotyping required"],
-  ["Cardiovascular","ATTR Amyloidosis","Ionis / AstraZeneca","Wainua (eplontersen)","Commercial","TTR","Pathogenic variant","Active STP — AZ/Ionis TTR testing support"],
-  ["Cardiovascular","ATTR Amyloidosis","BridgeBio","Attruby (acoramidis)","Commercial","TTR V122I (Val142Ile)","Pathogenic variant (prevalent in African Americans)","Active STP — V122I screening program"],
-  ["Cardiovascular","Hypertrophic Cardiomyopathy","Bristol-Myers Squibb","Camzyos (mavacamten)","Commercial","MYH7 / MYBPC3","Pathogenic variant (autosomal dominant)","Strong Candidate — BMS HCM genetic programs"],
-  ["Cardiovascular","Hypertrophic Cardiomyopathy","Cytokinetics","Aficamten","Phase 3 / NDA","MYH7 / MYBPC3","Pathogenic variant","Strong Candidate — genetic stratification in SEQUOIA-HCM"],
+  ["Cardiovascular","Familial Hypercholesterolemia","Amgen","Repatha (evolocumab)","Commercial","PCSK9 / LDLR","GOF (PCSK9); LOF (LDLR)","Strong Candidate — FH cascade screening partnerships","Yes (Exome+)","None identified"],
+  ["Cardiovascular","Familial Hypercholesterolemia","Sanofi / Regeneron","Praluent (alirocumab)","Commercial","PCSK9 / LDLR","GOF (PCSK9); LOF (LDLR)","Strong Candidate — FH advocacy; no formal CDx","Yes (Exome+)","None identified"],
+  ["Cardiovascular","Familial Hypercholesterolemia","Novartis","Leqvio (inclisiran)","Commercial","PCSK9","GOF target; siRNA silencing","Active STP — FH cascade screening support (HEART-UK)","Yes (Exome+)","None identified"],
+  ["Cardiovascular","Lipoprotein(a) Elevation","Novartis","Pelacarsen (TQJ230)","Phase 3","LPA","Risk variant (kringle IV-2 repeat)","Strong Candidate — Lp(a) screening programs","Partial (SNP yes; copy number limited)","None identified"],
+  ["Cardiovascular","Lipoprotein(a) Elevation","Amgen","Olpasiran","Phase 3","LPA","Risk variant (rs10455872)","Strong Candidate — Lp(a) testing in trials","Partial (SNP yes; copy number limited)","None identified"],
+  ["Cardiovascular","ATTR Amyloidosis","Pfizer","Vyndaqel / Vyndamax (tafamidis)","Commercial","TTR","Pathogenic variant / wild-type","Active STP — CardioTTRansport program","Yes (Exome+)","None identified"],
+  ["Cardiovascular","ATTR Amyloidosis","Alnylam","Onpattro / Amvuttra","Commercial","TTR","Pathogenic variant (hereditary hATTR)","Active STP — ActNow program; TTR genotyping required","Yes (Exome+)","Ambry Genetics (Alnylam Act® program)"],
+  ["Cardiovascular","ATTR Amyloidosis","Ionis / AstraZeneca","Wainua (eplontersen)","Commercial","TTR","Pathogenic variant","Active STP — AZ/Ionis TTR testing support","Yes (Exome+)","Prevention Genetics (NavigATTR program)"],
+  ["Cardiovascular","ATTR Amyloidosis","BridgeBio","Attruby (acoramidis)","Commercial","TTR V122I (Val142Ile)","Pathogenic variant (prevalent in African Americans)","Active STP — V122I screening program","Yes (Exome+)","None identified"],
+  ["Cardiovascular","Hypertrophic Cardiomyopathy","Bristol-Myers Squibb","Camzyos (mavacamten)","Commercial","MYH7 / MYBPC3","Pathogenic variant (autosomal dominant)","Strong Candidate — BMS HCM genetic programs","Yes (Exome+)","None identified"],
+  ["Cardiovascular","Hypertrophic Cardiomyopathy","Cytokinetics","Aficamten","Phase 3 / NDA","MYH7 / MYBPC3","Pathogenic variant","Strong Candidate — genetic stratification in SEQUOIA-HCM","Yes (Exome+)","None identified"],
+  ["Cardiovascular","Hypertrophic Cardiomyopathy (MYBPC3)","Tenaya Therapeutics","TN-201 (AAV9-MYBPC3)","Phase 2","MYBPC3","LOF pathogenic variant (haploinsufficiency)","Active STP — MYBPC3 testing required for enrollment","Yes (Exome+)","None identified"],
+  ["Cardiovascular","Arrhythmogenic Cardiomyopathy (ARVC)","Tenaya Therapeutics","TN-401 (rAAV-PKP2)","Phase 2","PKP2","LOF pathogenic variant (desmosomal)","Active STP — PKP2 testing required for enrollment","Yes (Exome+)","None identified"],
+  ["Cardiovascular","Familial Hypercholesterolemia / CVD","Verve Therapeutics","VERVE-101 (PCSK9 base editing)","Phase 1/2","PCSK9","Base editing target (GOF LOF induction)","Active STP — HeFH genetic confirmation for enrollment","Yes (Exome+)","None identified"],
+  ["Cardiovascular","Lipoprotein(a) Elevation","Verve Therapeutics","VERVE-102 (LPA base editing)","Phase 1/2","LPA","Base editing target","Active STP — LPA genotyping for enrollment","Partial (SNP yes; copy number limited)","None identified"],
   // METABOLIC
-  ["Metabolic","MASH","Madrigal","Rezdiffra (resmetirom)","Commercial","PNPLA3 / TM6SF2 / HSD17B13","Risk variants (I148M; E167K; splice)","Strong Candidate — MAESTRO genetic subgroup analyses"],
-  ["Metabolic","MASH (PNPLA3-targeted)","Ionis","ION839","Phase 2","PNPLA3","I148M allele-specific ASO; LOF","Active STP — I148M genotyping required"],
-  ["Metabolic","MASH (PNPLA3-targeted)","Arrowhead","ARO-PNPLA3","Phase 2","PNPLA3","I148M RNAi silencing","Active STP — I148M genotyping mandatory"],
-  ["Metabolic","MASH","Novo Nordisk","Semaglutide (ESSENCE trial)","Phase 3","PNPLA3","Risk variant (biomarker subgroup)","Potential"],
-  ["Metabolic","Monogenic Obesity","Rhythm Pharmaceuticals","Imcivree (setmelanotide)","Commercial","MC4R / POMC / PCSK1 / LEPR","Loss-of-function variant","Active STP — Uncovering Rare Obesity panel; label-required CDx"],
-  ["Metabolic","Obesity / GLP-1 Response","Novo Nordisk","Wegovy (semaglutide)","Commercial","MC4R / FTO / polygenic BMI PRS","Risk variant / polygenic","Potential — pharmacogenomic research ongoing"],
-  ["Metabolic","Obesity / GLP-1 Response","Eli Lilly","Zepbound (tirzepatide)","Commercial","MC4R / FTO / polygenic BMI PRS","Risk variant / polygenic","Potential"],
+  ["Metabolic","MASH","Madrigal","Rezdiffra (resmetirom)","Commercial","PNPLA3 / TM6SF2 / HSD17B13","Risk variants (I148M; E167K; splice)","Strong Candidate — MAESTRO genetic subgroup analyses","Yes (Exome+)","None identified"],
+  ["Metabolic","MASH (PNPLA3-targeted)","Ionis","ION839","Phase 2","PNPLA3","I148M allele-specific ASO; LOF","Active STP — I148M genotyping required","Yes (Exome+)","None identified"],
+  ["Metabolic","MASH (PNPLA3-targeted)","Arrowhead","ARO-PNPLA3","Phase 2","PNPLA3","I148M RNAi silencing","Active STP — I148M genotyping mandatory","Yes (Exome+)","None identified"],
+  ["Metabolic","MASH","Novo Nordisk","Semaglutide (ESSENCE trial)","Phase 3","PNPLA3","Risk variant (biomarker subgroup)","Potential","Yes (Exome+)","None identified"],
+  ["Metabolic","Monogenic Obesity","Rhythm Pharmaceuticals","Imcivree (setmelanotide)","Commercial","MC4R / POMC / PCSK1 / LEPR","Loss-of-function variant","Active STP — Uncovering Rare Obesity panel; label-required CDx","Yes (Exome+)","Prevention Genetics (Uncovering Rare Obesity)"],
+  ["Metabolic","Obesity / GLP-1 Response","Novo Nordisk","Wegovy (semaglutide)","Commercial","MC4R / FTO / polygenic BMI PRS","Risk variant / polygenic","Potential — pharmacogenomic research ongoing","Partial (common SNVs yes; PRS requires array/WGS)","None identified"],
+  ["Metabolic","Obesity / GLP-1 Response","Eli Lilly","Zepbound (tirzepatide)","Commercial","MC4R / FTO / polygenic BMI PRS","Risk variant / polygenic","Potential","Partial (common SNVs yes; PRS requires array/WGS)","None identified"],
+  ["Metabolic","Phenylketonuria (PKU)","BioMarin","Palynziq (pegvaliase)","Commercial","PAH","Biallelic LOF pathogenic variant","Active STP — PAH genetic testing required for diagnosis","Yes (Exome+)","None identified"],
   // NEURODEGENERATIVE
-  ["Neurodegenerative","Alzheimer's Disease","Eisai / Biogen","Leqembi (lecanemab)","Commercial","APOE4","Risk variant (ARIA stratification)","Active STP — APOE4 genotyping recommended pre-treatment"],
-  ["Neurodegenerative","Alzheimer's Disease","Eli Lilly","Kisunla (donanemab)","Commercial","APOE4","Risk variant (dose-dependent ARIA risk)","Active STP — APOE4 genotyping for safety screening"],
-  ["Neurodegenerative","Parkinson's Disease","Biogen / Denali","BIIB122 (DNL151)","Phase 2/3","LRRK2","Pathogenic variant (G2019S)","Active STP — LRRK2 genotyping required for enrollment"],
-  ["Neurodegenerative","Parkinson's Disease","Eli Lilly","LY3819469","Phase 2","LRRK2","Pathogenic variant (G2019S)","Active STP — G2019S genotyping required"],
-  ["Neurodegenerative","Parkinson's Disease","Prevail / Eli Lilly","PR001 / LY3884963 (gene therapy)","Phase 1/2","GBA1","LOF pathogenic variant","Active STP — genetic testing required for enrollment"],
-  ["Neurodegenerative","ALS","Biogen","Qalsody (tofersen)","Commercial","SOD1","Pathogenic variant (100+ variants)","Active STP — SOD1 testing required; Biogen testing support program"],
-  ["Neurodegenerative","ALS","Wave Life Sciences / Takeda","WVE-004","Phase 1/2","C9orf72","Pathogenic repeat expansion","Active STP — repeat expansion testing required"],
-  ["Neurodegenerative","Huntington's Disease","Roche / Ionis","Tominersen","Phase 2/3","HTT","CAG repeat expansion (>36)","Active STP — CAG repeat testing required"],
-  ["Neurodegenerative","Huntington's Disease","uniQure","AMT-130","Phase 1/2","HTT","CAG repeat expansion","Active STP — CAG testing required"],
-  ["Neurodegenerative","SMA","Biogen","Spinraza (nusinersen)","Commercial","SMN1 / SMN2","Pathogenic variant + SMN2 copy number","Active STP — newborn screening support; testing programs"],
-  ["Neurodegenerative","SMA","Novartis","Zolgensma (onasemnogene)","Commercial","SMN1","Biallelic LOF (≤2 years)","Active STP — genetic confirmation required; access programs"],
-  ["Neurodegenerative","SMA","Roche / PTC","Evrysdi (risdiplam)","Commercial","SMN1 / SMN2","Pathogenic variant + copy number","Active STP — genetic testing required"],
-  ["Neurodegenerative","Friedreich's Ataxia","Reata / Biogen","Skyclarys (omaveloxolone)","Commercial","FXN","GAA repeat expansion","Active STP — FXN GAA repeat testing required"],
+  ["Neurodegenerative","Alzheimer's Disease","Eisai / Biogen","Leqembi (lecanemab)","Commercial","APOE4","Risk variant (ARIA stratification)","Active STP — APOE4 genotyping recommended pre-treatment","Yes (Exome+)","None identified"],
+  ["Neurodegenerative","Alzheimer's Disease","Eli Lilly","Kisunla (donanemab)","Commercial","APOE4","Risk variant (dose-dependent ARIA risk)","Active STP — APOE4 genotyping for safety screening","Yes (Exome+)","None identified"],
+  ["Neurodegenerative","Parkinson's Disease","Biogen / Denali","BIIB122 (DNL151)","Phase 2/3","LRRK2","Pathogenic variant (G2019S)","Active STP — LRRK2 genotyping required for enrollment","Yes (Exome+)","None identified"],
+  ["Neurodegenerative","Parkinson's Disease","Eli Lilly","LY3819469","Phase 2","LRRK2","Pathogenic variant (G2019S)","Active STP — G2019S genotyping required","Yes (Exome+)","None identified"],
+  ["Neurodegenerative","Parkinson's Disease","Prevail / Eli Lilly","PR001 / LY3884963 (gene therapy)","Phase 1/2","GBA1","LOF pathogenic variant","Active STP — genetic testing required for enrollment","Yes (Exome+)","None identified"],
+  ["Neurodegenerative","ALS","Biogen","Qalsody (tofersen)","Commercial","SOD1","Pathogenic variant (100+ variants)","Active STP — SOD1 testing required; Biogen testing support","Yes (Exome+)","None identified"],
+  ["Neurodegenerative","ALS","Wave Life Sciences / Takeda","WVE-004","Phase 1/2","C9orf72","Pathogenic repeat expansion","Active STP — repeat expansion testing required","No — repeat expansion (not Exome+)","None identified"],
+  ["Neurodegenerative","Huntington's Disease","Roche / Ionis","Tominersen","Phase 2/3","HTT","CAG repeat expansion (>36)","Active STP — CAG repeat testing required","No — repeat expansion (not Exome+)","Quest / Athena (CHDI Foundation HD program)"],
+  ["Neurodegenerative","Huntington's Disease","uniQure","AMT-130","Phase 1/2","HTT","CAG repeat expansion","Active STP — CAG testing required","No — repeat expansion (not Exome+)","None identified"],
+  ["Neurodegenerative","SMA","Biogen","Spinraza (nusinersen)","Commercial","SMN1 / SMN2","Pathogenic variant + SMN2 copy number","Active STP — newborn screening support; testing programs","No — copy number / deletion assay required","Quest / Athena (Biogen SMA program)"],
+  ["Neurodegenerative","SMA","Novartis","Zolgensma (onasemnogene)","Commercial","SMN1","Biallelic LOF (≤2 years)","Active STP — genetic confirmation required; access programs","No — copy number / deletion assay required","None identified"],
+  ["Neurodegenerative","SMA","Roche / PTC","Evrysdi (risdiplam)","Commercial","SMN1 / SMN2","Pathogenic variant + copy number","Active STP — genetic testing required","No — copy number / deletion assay required","None identified"],
+  ["Neurodegenerative","Friedreich's Ataxia","Reata / Biogen","Skyclarys (omaveloxolone)","Commercial","FXN","GAA repeat expansion","Active STP — FXN GAA repeat testing required","No — repeat expansion (not Exome+)","Prevention Genetics (Biogen FA Identified program)"],
+  ["Neurodegenerative","Duchenne Muscular Dystrophy","Solid Biosciences","SGT-001 (microdystrophin AAV)","Phase 1/2","DMD","LOF pathogenic variant (deletion/duplication/point)","Active STP — DMD genetic testing required for enrollment","Partial (SNVs/indels yes; large deletions via CNV analysis)","Invitae / Labcorp (Sarepta Detect MD program)"],
   // INI / AUTOIMMUNE
-  ["INI / Autoimmune","Systemic Lupus Erythematosus","AstraZeneca","Saphnelo (anifrolumab)","Commercial","IFNAR1 / IFN signature","High IFN type I signature (risk)","Active STP — IFN gene signature test in TULIP trials"],
-  ["INI / Autoimmune","SLE (interferonopathy)","Pipeline","JAK inhibitors (trials)","Phase 2","TREX1","LOF pathogenic variant (monogenic SLE)","Active STP — genetic confirmation required in trials"],
-  ["INI / Autoimmune","Atopic Dermatitis","Sanofi / Regeneron","Dupixent (dupilumab)","Commercial","IL4RA / FLG","LOF (FLG); pathway target (IL4RA)","Strong Candidate — FLG LOF predicts barrier dysfunction"],
-  ["INI / Autoimmune","Atopic Dermatitis","AbbVie","Rinvoq (upadacitinib)","Commercial","JAK1 / FLG","Target (JAK1); LOF (FLG)","Potential"],
-  ["INI / Autoimmune","Atopic Dermatitis","Pfizer","Cibinqo (abrocitinib)","Commercial","JAK1 / FLG","Target (JAK1); LOF (FLG)","Potential"],
-  ["INI / Autoimmune","IBD / Crohn's Disease","AbbVie","Skyrizi (risankizumab)","Commercial","NOD2 / IL23R","Risk variant (GWAS loci)","Potential — IL23R genetics relevant to pathway"],
-  ["INI / Autoimmune","Myasthenia Gravis","argenx","Vyvgart (efgartigimod)","Commercial","FCGRT / AChR+ status","Biomarker-driven (AChR+); FcRn pathway target","Active STP — AChR+ status required; testing supported"],
-  ["INI / Autoimmune","Psoriasis","Novartis","Cosentyx (secukinumab)","Commercial","HLA-C*06:02 / IL17A","Risk variant (HLA)","Potential — HLA-C*06:02 used in research"],
+  ["INI / Autoimmune","Systemic Lupus Erythematosus","AstraZeneca","Saphnelo (anifrolumab)","Commercial","IFNAR1 / IFN signature","High IFN type I signature (risk)","Active STP — IFN gene signature test in TULIP trials","Partial (gene variants yes; expression signature no)","None identified"],
+  ["INI / Autoimmune","SLE (interferonopathy)","Pipeline","JAK inhibitors (trials)","Phase 2","TREX1","LOF pathogenic variant (monogenic SLE)","Active STP — genetic confirmation required in trials","Yes (Exome+)","None identified"],
+  ["INI / Autoimmune","Atopic Dermatitis","Sanofi / Regeneron","Dupixent (dupilumab)","Commercial","IL4RA / FLG","LOF (FLG); pathway target (IL4RA)","Strong Candidate — FLG LOF predicts barrier dysfunction","Yes (Exome+)","None identified"],
+  ["INI / Autoimmune","Atopic Dermatitis","AbbVie","Rinvoq (upadacitinib)","Commercial","JAK1 / FLG","Target (JAK1); LOF (FLG)","Potential","Yes (Exome+)","None identified"],
+  ["INI / Autoimmune","Atopic Dermatitis","Pfizer","Cibinqo (abrocitinib)","Commercial","JAK1 / FLG","Target (JAK1); LOF (FLG)","Potential","Yes (Exome+)","None identified"],
+  ["INI / Autoimmune","IBD / Crohn's Disease","AbbVie","Skyrizi (risankizumab)","Commercial","NOD2 / IL23R","Risk variant (GWAS loci)","Potential — IL23R genetics relevant to pathway","Yes (Exome+)","None identified"],
+  ["INI / Autoimmune","Myasthenia Gravis","argenx","Vyvgart (efgartigimod)","Commercial","FCGRT / AChR+ status","Biomarker-driven (AChR+); FcRn pathway","Active STP — AChR+ status required; testing supported","Partial (FCGRT gene yes; AChR antibody is protein-based)","None identified"],
+  ["INI / Autoimmune","Psoriasis","Novartis","Cosentyx (secukinumab)","Commercial","HLA-C*06:02 / IL17A","Risk variant (HLA)","Potential — HLA-C*06:02 used in research","Partial (IL17A variants yes; HLA typing limited by Exome)","None identified"],
   // KIDNEY
-  ["Kidney","IgA Nephropathy","Calliditas / Pharmos","Tarpeyo (budesonide)","Commercial","TNFSF13B (APRIL)","Risk variant / gene duplication","Potential — no genetic CDx currently"],
-  ["Kidney","IgA Nephropathy","Chinook / Novartis","Zigakibart (BION-1301)","Phase 3","TNFSF13B","Risk variant / APRIL pathway","Potential — genetic stratification in development"],
-  ["Kidney","FSGS / APOL1-mediated KD","Vertex","Inaxaplin (VX-147)","Phase 3","APOL1","High-risk genotype (G1/G1; G1/G2; G2/G2)","Active STP — APOL1 genotyping required; genotype-first trial"],
-  ["Kidney","APOL1-mediated Kidney Disease","Ionis","ION532","Phase 2","APOL1","High-risk genotype (G1/G2) — ASO targeting","Active STP — APOL1 genotyping required"],
-  ["Kidney","ADPKD","Otsuka","Jynarque (tolvaptan)","Commercial","PKD1 / PKD2","Pathogenic variant (autosomal dominant)","Active STP — PKD1/PKD2 testing; Otsuka patient programs"],
-  ["Kidney","Fabry Disease","Amicus","Galafold (migalastat)","Commercial","GLA","Amenable missense variants (FDA CDx)","Active STP — FDA-approved CDx; amenability testing mandatory"],
-  ["Kidney","Fabry Disease","Sanofi / Genzyme","Fabrazyme (agalsidase beta)","Commercial","GLA","Pathogenic variant (X-linked LOF)","Active STP — GLA testing required; family screening programs"],
-  ["Kidney","Primary Hyperoxaluria Type 1","Alnylam","Oxlumo (lumasiran)","Commercial","AGXT","Pathogenic variant (LOF)","Active STP — AGXT genetic testing required"],
-  ["Kidney","Atypical HUS","Alexion / AstraZeneca","Ultomiris / Soliris","Commercial","CFH / CFI / C3 / CFB / CD46","Pathogenic variant (complement genes)","Active STP — complement gene panel; Alexion testing support"],
+  ["Kidney","IgA Nephropathy","Calliditas / Pharmos","Tarpeyo (budesonide)","Commercial","TNFSF13B (APRIL)","Risk variant / gene duplication","Potential — no genetic CDx currently","Yes (Exome+)","None identified"],
+  ["Kidney","IgA Nephropathy","Chinook / Novartis","Zigakibart (BION-1301)","Phase 3","TNFSF13B","Risk variant / APRIL pathway","Potential — genetic stratification in development","Yes (Exome+)","None identified"],
+  ["Kidney","FSGS / APOL1-mediated KD","Vertex","Inaxaplin (VX-147)","Phase 3","APOL1","High-risk genotype (G1/G1; G1/G2; G2/G2)","Active STP — APOL1 genotyping required; genotype-first trial","Yes (Exome+)","None identified"],
+  ["Kidney","APOL1-mediated Kidney Disease","Ionis","ION532","Phase 2","APOL1","High-risk genotype (G1/G2) — ASO targeting","Active STP — APOL1 genotyping required","Yes (Exome+)","None identified"],
+  ["Kidney","ADPKD","Otsuka","Jynarque (tolvaptan)","Commercial","PKD1 / PKD2","Pathogenic variant (autosomal dominant)","Active STP — PKD1/PKD2 testing; Otsuka patient programs","Yes (Exome+)","None identified"],
+  ["Kidney","Fabry Disease","Amicus","Galafold (migalastat)","Commercial","GLA","Amenable missense variants (FDA CDx)","Active STP — FDA-approved CDx; amenability testing mandatory","Yes (Exome+)","None identified"],
+  ["Kidney","Fabry Disease","Sanofi / Genzyme","Fabrazyme (agalsidase beta)","Commercial","GLA","Pathogenic variant (X-linked LOF)","Active STP — GLA testing required; family screening programs","Yes (Exome+)","None identified"],
+  ["Kidney","Primary Hyperoxaluria Type 1","Alnylam","Oxlumo (lumasiran)","Commercial","AGXT","Pathogenic variant (LOF)","Active STP — AGXT genetic testing required","Yes (Exome+)","Ambry Genetics (Alnylam Act® program)"],
+  ["Kidney","Atypical HUS","Alexion / AstraZeneca","Ultomiris / Soliris","Commercial","CFH / CFI / C3 / CFB / CD46","Pathogenic variant (complement genes)","Active STP — complement gene panel; Alexion testing support","Yes (Exome+)","None identified"],
   // LIVER
-  ["Liver","MASH","Madrigal","Rezdiffra (resmetirom)","Commercial","PNPLA3 / TM6SF2 / HSD17B13","Risk variants (I148M; E167K; splice)","Strong Candidate — genetic stratification post-approval"],
-  ["Liver","MASH (PNPLA3-specific)","Ionis","ION839","Phase 2","PNPLA3","I148M allele-specific ASO","Active STP — I148M genotyping required"],
-  ["Liver","MASH (PNPLA3-specific)","Arrowhead","ARO-PNPLA3","Phase 2","PNPLA3","I148M RNAi silencing","Active STP — I148M genotyping mandatory"],
-  ["Liver","Alpha-1 Antitrypsin Deficiency","Arrowhead","Fazirsiran (ARO-AAT)","Phase 3","SERPINA1","Pi*ZZ homozygous (LOF)","Active STP — Pi*ZZ genotyping required; Arrowhead testing support"],
-  ["Liver","Alpha-1 Antitrypsin Deficiency","Ionis","Belcesiran (ION065)","Phase 2/3","SERPINA1","Pi*ZZ (LOF)","Active STP — genetic testing required"],
-  ["Liver","Alpha-1 Antitrypsin Deficiency","Vertex","VX-864 / VX-634","Phase 2","SERPINA1","Pi*ZZ (LOF) — corrector approach","Active STP — ZZ genotype testing required"],
-  ["Liver","Primary Biliary Cholangitis","Ipsen / Genfit","Iqirvo (elafibranor)","Commercial","PPARD / HLA loci","Risk variant (GWAS)","Potential — no genetic CDx currently"],
-  ["Liver","Primary Biliary Cholangitis","Gilead / CymaBay","Livdelzi (seladelpar)","Commercial","PPARD / HLA loci","Risk variant (GWAS)","Potential"],
-  ["Liver","Wilson's Disease","Alexion / AstraZeneca","ALXN2075 / WTX101","Phase 2/3","ATP7B","LOF pathogenic variant (autosomal recessive)","Active STP — ATP7B genotyping standard; Alexion supports workup"],
-  ["Liver","Alagille Syndrome","Mirum","Livmarli (maralixibat)","Commercial","JAG1 / NOTCH2","Pathogenic variant (autosomal dominant)","Active STP — genetic diagnosis required; Mirum supports testing"],
-  ["Liver","Acute Hepatic Porphyria","Alnylam","Givlaari (givosiran)","Commercial","HMBS / ALAS1","LOF (HMBS); ALAS1 is therapeutic target","Active STP — HMBS genetic testing; Alnylam AHP program"],
+  ["Liver","MASH","Madrigal","Rezdiffra (resmetirom)","Commercial","PNPLA3 / TM6SF2 / HSD17B13","Risk variants (I148M; E167K; splice)","Strong Candidate — genetic stratification post-approval","Yes (Exome+)","None identified"],
+  ["Liver","MASH (PNPLA3-specific)","Ionis","ION839","Phase 2","PNPLA3","I148M allele-specific ASO","Active STP — I148M genotyping required","Yes (Exome+)","None identified"],
+  ["Liver","MASH (PNPLA3-specific)","Arrowhead","ARO-PNPLA3","Phase 2","PNPLA3","I148M RNAi silencing","Active STP — I148M genotyping mandatory","Yes (Exome+)","None identified"],
+  ["Liver","Alpha-1 Antitrypsin Deficiency","Arrowhead","Fazirsiran (ARO-AAT)","Phase 3","SERPINA1","Pi*ZZ homozygous (LOF)","Active STP — Pi*ZZ genotyping required; Arrowhead testing support","Yes (Exome+)","None identified"],
+  ["Liver","Alpha-1 Antitrypsin Deficiency","Ionis","Belcesiran (ION065)","Phase 2/3","SERPINA1","Pi*ZZ (LOF)","Active STP — genetic testing required","Yes (Exome+)","None identified"],
+  ["Liver","Alpha-1 Antitrypsin Deficiency","Vertex","VX-864 / VX-634","Phase 2","SERPINA1","Pi*ZZ (LOF) — corrector approach","Active STP — ZZ genotype testing required","Yes (Exome+)","None identified"],
+  ["Liver","Primary Biliary Cholangitis","Ipsen / Genfit","Iqirvo (elafibranor)","Commercial","PPARD / HLA loci","Risk variant (GWAS)","Potential — no genetic CDx currently","Partial (PPARD variants yes; HLA limited)","None identified"],
+  ["Liver","Primary Biliary Cholangitis","Gilead / CymaBay","Livdelzi (seladelpar)","Commercial","PPARD / HLA loci","Risk variant (GWAS)","Potential","Partial (PPARD variants yes; HLA limited)","None identified"],
+  ["Liver","Wilson's Disease","Alexion / AstraZeneca","ALXN2075 / WTX101","Phase 2/3","ATP7B","LOF pathogenic variant (autosomal recessive)","Active STP — ATP7B genotyping standard; Alexion supports workup","Yes (Exome+)","None identified"],
+  ["Liver","Alagille Syndrome","Mirum","Livmarli (maralixibat)","Commercial","JAG1 / NOTCH2","Pathogenic variant (autosomal dominant)","Active STP — genetic diagnosis required; Mirum supports testing","Yes (Exome+)","Prevention Genetics (Mirum program)"],
+  ["Liver","Acute Hepatic Porphyria","Alnylam","Givlaari (givosiran)","Commercial","HMBS / ALAS1","LOF (HMBS); ALAS1 is therapeutic target","Active STP — HMBS genetic testing; Alnylam AHP program","Yes (Exome+)","Ambry Genetics (Alnylam Act® program)"],
+  // LYSOSOMAL STORAGE DISEASE
+  ["Lysosomal Storage Disease","Gaucher Disease (Types 1–3)","Sanofi / Genzyme","Cerezyme (imiglucerase)","Commercial","GBA1","Biallelic LOF pathogenic variant","Active STP — GBA1 genetic testing required; family screening programs","Yes (Exome+)","Invitae / Labcorp (Detect LSD — multi-sponsor)"],
+  ["Lysosomal Storage Disease","Gaucher Disease (Types 1–3)","Pfizer / Protalix","Elelyso (taliglucerase alfa)","Commercial","GBA1","Biallelic LOF pathogenic variant","Active STP — genetic testing required for diagnosis","Yes (Exome+)","None identified"],
+  ["Lysosomal Storage Disease","Pompe Disease (GSD Type II)","Sanofi / Genzyme","Myozyme / Lumizyme (alglucosidase)","Commercial","GAA","Biallelic LOF pathogenic variant","Active STP — GAA testing required; NBS support programs","Yes (Exome+)","Invitae / Labcorp (Detect LSD — multi-sponsor)"],
+  ["Lysosomal Storage Disease","Pompe Disease (GSD Type II)","Amicus / Sanofi","Pombiliti + Opfolda (cipaglucosidase)","Commercial","GAA","Biallelic LOF pathogenic variant","Active STP — genetic testing required for diagnosis","Yes (Exome+)","None identified"],
+  ["Lysosomal Storage Disease","Niemann-Pick Type C","Zevra Therapeutics","Miplyffa (arimoclomol)","Commercial","NPC1 / NPC2","LOF pathogenic variant","Active STP — NPC genetic panel required; Zevra–GeneDx program","Yes (Exome+)","GeneDx (Zevra NPC testing program)"],
+  ["Lysosomal Storage Disease","MPS I (Hurler / Scheie)","Sanofi / Genzyme","Aldurazyme (laronidase)","Commercial","IDUA","Biallelic LOF pathogenic variant","Active STP — IDUA genetic testing required","Yes (Exome+)","Invitae / Labcorp (Detect LSD — multi-sponsor)"],
+  ["Lysosomal Storage Disease","MPS II (Hunter Syndrome)","Takeda","Elaprase (idursulfase)","Commercial","IDS","Hemizygous LOF (X-linked)","Active STP — IDS genetic testing required","Yes (Exome+)","Invitae / Labcorp (Detect LSD — multi-sponsor)"],
+  ["Lysosomal Storage Disease","Batten Disease (CLN2 / NCL)","BioMarin","Brineura (cerliponase alfa)","Commercial","CLN2 (TPP1)","Biallelic LOF pathogenic variant","Active STP — CLN2 genetic testing required for diagnosis","Yes (Exome+)","None identified"],
+  ["Lysosomal Storage Disease","MPS VI (Maroteaux-Lamy)","BioMarin","Naglazyme (galsulfase)","Commercial","ARSB","Biallelic LOF pathogenic variant","Active STP — ARSB genetic testing required","Yes (Exome+)","None identified"],
+  // SKELETAL / RARE BONE
+  ["Skeletal / Rare Bone","Achondroplasia","BioMarin","Voxzogo (vosoritide)","Commercial","FGFR3","GOF pathogenic variant (p.Gly380Arg)","Active STP — FGFR3 testing required; Invitae Discover Dysplasias program","Yes (Exome+)","Invitae / Labcorp (BioMarin Discover Dysplasias™)"],
+  ["Skeletal / Rare Bone","Achondroplasia","Ascendis Pharma","TransCon CNP (navepegritide alfa)","Phase 3","NPR2 / FGFR3","GOF (FGFR3); NPR2 pathway","Strong Candidate — genetic confirmation for enrollment","Yes (Exome+)","None identified"],
+  ["Skeletal / Rare Bone","X-linked Hypophosphatemia (XLH)","Kyowa Kirin / Ultragenyx","Crysvita (burosumab)","Commercial","PHEX / FGF23","LOF (PHEX); FGF23 over-secretion","Active STP — PHEX testing supported; Blueprint Genetics XLH/TIO program","Yes (Exome+)","Blueprint Genetics (Kyowa Kirin XLH/TIO program)"],
+  ["Skeletal / Rare Bone","Hypophosphatasia (HPP)","Alexion / AstraZeneca","Strensiq (asfotase alfa)","Commercial","ALPL","LOF pathogenic variant (autosomal recessive/dominant)","Active STP — ALPL genetic testing required for diagnosis","Yes (Exome+)","None identified"],
+  // NEURODEVELOPMENTAL
+  ["Neurodevelopmental","Rett Syndrome","Acadia Pharmaceuticals","Daybue (trofinetide)","Commercial","MECP2","LOF pathogenic variant (X-linked dominant)","Strong Candidate — MECP2 genetic diagnosis required for enrollment","Yes (Exome+)","None identified"],
+  ["Neurodevelopmental","CDKL5 Deficiency Disorder","Marinus Pharmaceuticals","Ztalmy (ganaxolone)","Commercial","CDKL5","LOF pathogenic variant (X-linked)","Active STP — CDKL5 genetic testing required for diagnosis","Yes (Exome+)","None identified"],
+  ["Neurodevelopmental","Tuberous Sclerosis Complex","Novartis","Afinitor / Votubia (everolimus)","Commercial","TSC1 / TSC2","LOF pathogenic variant (mTOR pathway)","Active STP — TSC1/TSC2 genetic testing required","Yes (Exome+)","None identified"],
+  ["Neurodevelopmental","Angelman Syndrome","Ultragenyx","GTX-102 (antisense oligonucleotide)","Phase 2/3","UBE3A","LOF / imprinting defect (maternal allele)","Active STP — UBE3A / 15q11 genetic testing required","Yes (Exome+; methylation via MLPA for imprinting)","None identified"],
+  ["Neurodevelopmental","Sensorineural Hearing Loss","Eli Lilly","Investigational (Resonate® program)","Phase 1/2","OTOF / GJB2","LOF pathogenic variant","Active STP — genetic diagnosis required for enrollment; Resonate® program","Yes (Exome+)","Prevention Genetics (Eli Lilly Resonate® program)"],
+  ["Neurodevelopmental","Dravet Syndrome / Epilepsy (SCN1A)","Encoded Therapeutics","ETX101 (SCN1A gene therapy)","Phase 1/2","SCN1A","GOF pathogenic variant (Dravet)","Active STP — SCN1A genetic testing required for enrollment","Yes (Exome+)","GeneDx (multi-sponsor Pediatric Epilepsy program)"],
 ];
 
 const AREA_CLASS = {
-  "Cardiovascular":   "area-cardio",
-  "Metabolic":        "area-metabolic",
-  "Neurodegenerative":"area-neuro",
-  "INI / Autoimmune": "area-ini",
-  "Kidney":           "area-kidney",
-  "Liver":            "area-liver",
+  "Cardiovascular":          "area-cardio",
+  "Metabolic":               "area-metabolic",
+  "Neurodegenerative":       "area-neuro",
+  "INI / Autoimmune":        "area-ini",
+  "Kidney":                  "area-kidney",
+  "Liver":                   "area-liver",
+  "Lysosomal Storage Disease":"area-lsd",
+  "Skeletal / Rare Bone":    "area-skeletal",
+  "Neurodevelopmental":      "area-neurodev",
 };
 const DOT_CLASS = {
-  "Cardiovascular":   "dot-cardio",
-  "Metabolic":        "dot-metabolic",
-  "Neurodegenerative":"dot-neuro",
-  "INI / Autoimmune": "dot-ini",
-  "Kidney":           "dot-kidney",
-  "Liver":            "dot-liver",
+  "Cardiovascular":          "dot-cardio",
+  "Metabolic":               "dot-metabolic",
+  "Neurodegenerative":       "dot-neuro",
+  "INI / Autoimmune":        "dot-ini",
+  "Kidney":                  "dot-kidney",
+  "Liver":                   "dot-liver",
+  "Lysosomal Storage Disease":"dot-lsd",
+  "Skeletal / Rare Bone":    "dot-skeletal",
+  "Neurodevelopmental":      "dot-neurodev",
 };
 
 function statusClass(s) {
@@ -403,6 +459,11 @@ function stpLabel(s) {
   if (s.startsWith("Active"))   return "● " + s;
   if (s.startsWith("Strong"))   return "◎ " + s;
   return "○ " + s;
+}
+function exomeClass(s) {
+  if (s.startsWith("Yes")) return "exome-yes";
+  if (s.startsWith("Partial")) return "exome-partial";
+  return "exome-no";
 }
 
 // Populate filter dropdowns
@@ -423,6 +484,7 @@ function render() {
   const company = document.getElementById('f-company').value;
   const status  = document.getElementById('f-status').value;
   const stp     = document.getElementById('f-stp').value;
+  const exome   = document.getElementById('f-exome').value;
 
   let filtered = DATA.filter(r => {
     const hay = r.join(' ').toLowerCase();
@@ -431,6 +493,7 @@ function render() {
     if (company && r[2] !== company)               return false;
     if (status  && !r[4].includes(status.split(' ')[0])) return false;
     if (stp     && !r[7].startsWith(stp))          return false;
+    if (exome   && !r[8].startsWith(exome))        return false;
     return true;
   });
 
@@ -464,6 +527,8 @@ function render() {
         <td>${geneTags}</td>
         <td><span class="type-text">${r[6]}</span></td>
         <td><span class="${stpClass(r[7])}">${stpLabel(r[7])}</span></td>
+        <td><span class="${exomeClass(r[8])}">${r[8]}</span></td>
+        <td style="font-size:11.5px;color:var(--muted)">${r[9]||'—'}</td>
       `;
       tbody.appendChild(tr);
     });
@@ -497,6 +562,7 @@ function resetFilters() {
   document.getElementById('f-company').value = '';
   document.getElementById('f-status').value  = '';
   document.getElementById('f-stp').value     = '';
+  document.getElementById('f-exome').value   = '';
   sortCol = -1; sortAsc = true;
   document.querySelectorAll('thead th').forEach(th => {
     th.classList.remove('sorted');
@@ -507,7 +573,7 @@ function resetFilters() {
 }
 
 // Event listeners
-['f-search','f-area','f-company','f-status','f-stp'].forEach(id => {
+['f-search','f-area','f-company','f-status','f-stp','f-exome'].forEach(id => {
   document.getElementById(id).addEventListener('input', render);
   document.getElementById(id).addEventListener('change', render);
 });
