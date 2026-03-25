@@ -107,6 +107,10 @@
   .legend-dot { width: 9px; height: 9px; border-radius: 50%; }
 
   /* ── TABLE ── */
+  .top-scroll-wrap { overflow-x: auto; margin-bottom: 2px; }
+  .top-scroll-wrap::-webkit-scrollbar { height: 6px; }
+  .top-scroll-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .top-scroll-inner { height: 1px; }
   .table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow-x: auto; }
   table { width: max-content; min-width: 100%; border-collapse: collapse; }
   thead tr { background: var(--navy); }
@@ -294,6 +298,7 @@
   </div>
 
   <!-- TABLE -->
+  <div class="top-scroll-wrap"><div class="top-scroll-inner"></div></div>
   <div class="table-wrap">
     <table id="main-table">
       <thead>
@@ -580,6 +585,18 @@ function resetFilters() {
 
 populateFilters();
 render();
+
+// Sync top scrollbar with table
+const tableWrap = document.querySelector('.table-wrap');
+const topWrap   = document.querySelector('.top-scroll-wrap');
+const topInner  = document.querySelector('.top-scroll-inner');
+function syncTopScrollWidth() {
+  topInner.style.width = tableWrap.scrollWidth + 'px';
+}
+syncTopScrollWidth();
+new ResizeObserver(syncTopScrollWidth).observe(tableWrap);
+topWrap.addEventListener('scroll', () => { tableWrap.scrollLeft = topWrap.scrollLeft; });
+tableWrap.addEventListener('scroll', () => { topWrap.scrollLeft = tableWrap.scrollLeft; });
 </script>
 </body>
 </html>
