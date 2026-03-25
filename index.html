@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pharma Sponsored Testing Landscape | Helix</title>
+<style>
+  :root {
+    --navy:      #1A2B4A;
+    --navy-mid:  #243558;
+    --navy-light:#2D3F6B;
+    --green:     #3DBF84;
+    --green-dark:#2A9E6A;
+    --pink:      #E85C7A;
+    --blue-acc:  #4A90D9;
+    --bg:        #F0F3F8;
+    --card:      #FFFFFF;
+    --border:    #DDE3EE;
+    --text:      #1E2B3C;
+    --muted:     #6B7A99;
+    --tag-bg:    #EEF2FA;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Calibri, Arial, sans-serif; background: var(--bg); color: var(--text); font-size: 13px; }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--navy);
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    border-bottom: 3px solid var(--green);
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-mark {
+    width: 30px; height: 30px; background: var(--green);
+    border-radius: 6px; display: flex; align-items: center;
+    justify-content: center; font-weight: 900; color: var(--navy); font-size: 16px;
+  }
+  .logo-text { color: #fff; font-size: 17px; font-weight: 700; letter-spacing: 0.5px; }
+  .logo-sub  { color: #8AAAD0; font-size: 12px; margin-left: 2px; font-weight: 400; }
+  .header-tag { background: rgba(61,191,132,0.15); color: var(--green); border: 1px solid rgba(61,191,132,0.35);
+    padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: 0.4px; }
+
+  /* ── PAGE WRAPPER ── */
+  .page { max-width: 1440px; margin: 0 auto; padding: 24px 28px 40px; }
+
+  /* ── PAGE TITLE ── */
+  .page-title { margin-bottom: 20px; }
+  .page-title h1 { font-size: 22px; font-weight: 700; color: var(--navy); }
+  .page-title p  { color: var(--muted); font-size: 13px; margin-top: 3px; }
+
+  /* ── STAT CARDS ── */
+  .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 22px; }
+  .stat-card {
+    background: var(--card); border-radius: 10px; padding: 16px 18px;
+    border: 1px solid var(--border); position: relative; overflow: hidden;
+  }
+  .stat-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--green);
+  }
+  .stat-card.pink::before  { background: var(--pink); }
+  .stat-card.blue::before  { background: var(--blue-acc); }
+  .stat-card.navy::before  { background: var(--navy-light); }
+  .stat-card.gold::before  { background: #F0B42A; }
+  .stat-num  { font-size: 28px; font-weight: 800; color: var(--navy); line-height: 1.1; }
+  .stat-label{ font-size: 11px; color: var(--muted); margin-top: 4px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ── FILTERS ── */
+  .filter-bar {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 18px; margin-bottom: 18px;
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr; gap: 12px;
+    align-items: end;
+  }
+  .filter-group label { display: block; font-size: 11px; font-weight: 600;
+    color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px; }
+  .filter-group input,
+  .filter-group select {
+    width: 100%; padding: 8px 12px; border: 1.5px solid var(--border);
+    border-radius: 7px; font-size: 13px; color: var(--text);
+    background: #FAFBFD; outline: none; transition: border-color 0.15s;
+    font-family: inherit;
+  }
+  .filter-group input:focus,
+  .filter-group select:focus { border-color: var(--green); background: #fff; }
+  .filter-group input::placeholder { color: #aab; }
+  .btn-reset {
+    padding: 8px 18px; background: var(--navy); color: #fff; border: none;
+    border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer;
+    transition: background 0.15s; align-self: end; white-space: nowrap;
+  }
+  .btn-reset:hover { background: var(--navy-light); }
+
+  /* ── RESULTS BAR ── */
+  .results-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px;
+  }
+  .results-count { font-size: 13px; color: var(--muted); }
+  .results-count strong { color: var(--navy); }
+  .legend { display: flex; gap: 16px; align-items: center; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; }
+
+  /* ── TABLE ── */
+  .table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: var(--navy); }
+  thead th {
+    padding: 11px 13px; text-align: left; font-size: 10.5px; font-weight: 700;
+    color: #A8C0E0; text-transform: uppercase; letter-spacing: 0.5px;
+    border-right: 1px solid rgba(255,255,255,0.06); white-space: nowrap; cursor: pointer;
+    user-select: none;
+  }
+  thead th:hover { color: #fff; }
+  thead th .sort-icon { opacity: 0.4; margin-left: 4px; }
+  thead th.sorted .sort-icon { opacity: 1; color: var(--green); }
+
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  tbody tr:hover { background: #F5F8FF; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td { padding: 10px 13px; vertical-align: top; font-size: 12.5px; line-height: 1.4; }
+
+  /* ── AREA BADGE ── */
+  .area-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 9px; border-radius: 5px; font-size: 10.5px; font-weight: 700;
+    white-space: nowrap;
+  }
+  .area-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── STATUS BADGE ── */
+  .status-badge {
+    display: inline-block; padding: 2px 9px; border-radius: 20px;
+    font-size: 10.5px; font-weight: 700; white-space: nowrap;
+  }
+  .status-commercial { background: rgba(61,191,132,0.15); color: #1E8A56; border: 1px solid rgba(61,191,132,0.3); }
+  .status-phase3     { background: rgba(74,144,217,0.12); color: #2366A8; border: 1px solid rgba(74,144,217,0.3); }
+  .status-phase2     { background: rgba(240,180,42,0.12); color: #9A7000; border: 1px solid rgba(240,180,42,0.3); }
+  .status-phase1     { background: rgba(150,150,170,0.12); color: #555; border: 1px solid #DDD; }
+
+  /* ── STP BADGE ── */
+  .stp-active    { color: #1E8A56; font-weight: 700; }
+  .stp-strong    { color: #2366A8; font-weight: 600; }
+  .stp-potential { color: var(--muted); }
+
+  /* ── GENE TAG ── */
+  .gene-tag {
+    display: inline-block; background: var(--navy); color: #8AAAD0;
+    padding: 2px 7px; border-radius: 4px; font-size: 10.5px; font-weight: 700;
+    font-family: 'Courier New', monospace; margin: 1px; white-space: nowrap;
+  }
+
+  .drug-name { font-weight: 700; color: var(--navy); }
+  .company-name { color: var(--muted); font-size: 12px; }
+  .type-text { color: var(--muted); font-size: 11.5px; font-style: italic; }
+
+  /* ── EMPTY STATE ── */
+  .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .empty .empty-icon { font-size: 36px; margin-bottom: 12px; }
+  .empty h3 { font-size: 16px; color: var(--navy); margin-bottom: 6px; }
+
+  /* ── FOOTER ── */
+  footer { text-align: center; margin-top: 28px; color: var(--muted); font-size: 11px; }
+
+  /* ── AREA COLORS ── */
+  .area-cardio  { background: rgba(26,71,138,0.08); color: #1A478A; }
+  .area-metabolic{ background: rgba(30,138,86,0.1); color: #1E6B40; }
+  .area-neuro   { background: rgba(91,58,142,0.1); color: #5B3A8E; }
+  .area-ini     { background: rgba(232,92,122,0.1); color: #B83055; }
+  .area-kidney  { background: rgba(0,107,107,0.1); color: #006B6B; }
+  .area-liver   { background: rgba(139,105,20,0.1); color: #7A5C0A; }
+
+  .dot-cardio   { background: #1A478A; }
+  .dot-metabolic{ background: #2A9E6A; }
+  .dot-neuro    { background: #5B3A8E; }
+  .dot-ini      { background: #E85C7A; }
+  .dot-kidney   { background: #006B6B; }
+  .dot-liver    { background: #F0B42A; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">H</div>
+    <span class="logo-text">Helix <span class="logo-sub">GenoSphere™</span></span>
+  </div>
+  <div class="header-tag">US Sponsored Testing Landscape · 2026</div>
+</header>
+
+<div class="page">
+
+  <div class="page-title">
+    <h1>Pharma Sponsored Genetic Testing Programs</h1>
+    <p>US FDA-approved and active US clinical stage programs with genetic targets · Prioritized by STP relevance</p>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-num" id="stat-total">59</div>
+      <div class="stat-label">Total Programs</div>
+    </div>
+    <div class="stat-card pink">
+      <div class="stat-num" id="stat-active">0</div>
+      <div class="stat-label">Active STPs</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-num" id="stat-strong">0</div>
+      <div class="stat-label">Strong Candidates</div>
+    </div>
+    <div class="stat-card navy">
+      <div class="stat-num" id="stat-areas">6</div>
+      <div class="stat-label">Disease Areas</div>
+    </div>
+    <div class="stat-card gold">
+      <div class="stat-num" id="stat-companies">0</div>
+      <div class="stat-label">Companies</div>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label>Search</label>
+      <input type="text" id="f-search" placeholder="Drug, company, gene, indication…">
+    </div>
+    <div class="filter-group">
+      <label>Disease Area</label>
+      <select id="f-area"><option value="">All Areas</option></select>
+    </div>
+    <div class="filter-group">
+      <label>Company</label>
+      <select id="f-company"><option value="">All Companies</option></select>
+    </div>
+    <div class="filter-group">
+      <label>US Status</label>
+      <select id="f-status">
+        <option value="">All Statuses</option>
+        <option>Commercial</option>
+        <option>Phase 3 / NDA</option>
+        <option>Phase 2/3</option>
+        <option>Phase 2</option>
+        <option>Phase 1/2</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>STP Status</label>
+      <select id="f-stp">
+        <option value="">All</option>
+        <option value="Active">Active STP</option>
+        <option value="Strong">Strong Candidate</option>
+        <option value="Potential">Potential</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <button class="btn-reset" onclick="resetFilters()">Reset Filters</button>
+    </div>
+  </div>
+
+  <!-- RESULTS BAR -->
+  <div class="results-bar">
+    <div class="results-count">Showing <strong id="showing-count">59</strong> of <strong>59</strong> programs</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#1E8A56"></div> Active STP</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#2366A8"></div> Strong Candidate</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#AAB"></div> Potential</div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table id="main-table">
+      <thead>
+        <tr>
+          <th onclick="sortTable(0)">Disease Area <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable(1)">Indication <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable(2)">Company <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable(3)">Drug / Program <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable(4)">US Status <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable(5)">Genetic Target <span class="sort-icon">↕</span></th>
+          <th>Target Type</th>
+          <th onclick="sortTable(7)">STP Status <span class="sort-icon">↕</span></th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+    <div class="empty" id="empty-state" style="display:none">
+      <div class="empty-icon">🔬</div>
+      <h3>No programs match your filters</h3>
+      <p>Try adjusting your search or filter criteria</p>
+    </div>
+  </div>
+
+  <footer>
+    <p>Helix GenoSphere™ · Pharma Sponsored Testing Landscape · US Programs Only · 2026 · <em>For internal use only</em></p>
+  </footer>
+</div>
+
+<script>
+const DATA = [
+  // CARDIOVASCULAR
+  ["Cardiovascular","Familial Hypercholesterolemia","Amgen","Repatha (evolocumab)","Commercial","PCSK9 / LDLR","GOF (PCSK9); LOF (LDLR)","Strong Candidate — FH cascade screening partnerships"],
+  ["Cardiovascular","Familial Hypercholesterolemia","Sanofi / Regeneron","Praluent (alirocumab)","Commercial","PCSK9 / LDLR","GOF (PCSK9); LOF (LDLR)","Strong Candidate — FH advocacy; no formal CDx"],
+  ["Cardiovascular","Familial Hypercholesterolemia","Novartis","Leqvio (inclisiran)","Commercial","PCSK9","GOF target; siRNA silencing","Active STP — FH cascade screening support (HEART-UK)"],
+  ["Cardiovascular","Lipoprotein(a) Elevation","Novartis","Pelacarsen (TQJ230)","Phase 3","LPA","Risk variant (kringle IV-2 repeat)","Strong Candidate — Lp(a) screening programs"],
+  ["Cardiovascular","Lipoprotein(a) Elevation","Amgen","Olpasiran","Phase 3","LPA","Risk variant (rs10455872)","Strong Candidate — Lp(a) testing in trials"],
+  ["Cardiovascular","ATTR Amyloidosis","Pfizer","Vyndaqel / Vyndamax (tafamidis)","Commercial","TTR","Pathogenic variant / wild-type","Active STP — CardioTTRansport program"],
+  ["Cardiovascular","ATTR Amyloidosis","Alnylam","Onpattro / Amvuttra","Commercial","TTR","Pathogenic variant (hereditary hATTR)","Active STP — ActNow program; TTR genotyping required"],
+  ["Cardiovascular","ATTR Amyloidosis","Ionis / AstraZeneca","Wainua (eplontersen)","Commercial","TTR","Pathogenic variant","Active STP — AZ/Ionis TTR testing support"],
+  ["Cardiovascular","ATTR Amyloidosis","BridgeBio","Attruby (acoramidis)","Commercial","TTR V122I (Val142Ile)","Pathogenic variant (prevalent in African Americans)","Active STP — V122I screening program"],
+  ["Cardiovascular","Hypertrophic Cardiomyopathy","Bristol-Myers Squibb","Camzyos (mavacamten)","Commercial","MYH7 / MYBPC3","Pathogenic variant (autosomal dominant)","Strong Candidate — BMS HCM genetic programs"],
+  ["Cardiovascular","Hypertrophic Cardiomyopathy","Cytokinetics","Aficamten","Phase 3 / NDA","MYH7 / MYBPC3","Pathogenic variant","Strong Candidate — genetic stratification in SEQUOIA-HCM"],
+  // METABOLIC
+  ["Metabolic","MASH","Madrigal","Rezdiffra (resmetirom)","Commercial","PNPLA3 / TM6SF2 / HSD17B13","Risk variants (I148M; E167K; splice)","Strong Candidate — MAESTRO genetic subgroup analyses"],
+  ["Metabolic","MASH (PNPLA3-targeted)","Ionis","ION839","Phase 2","PNPLA3","I148M allele-specific ASO; LOF","Active STP — I148M genotyping required"],
+  ["Metabolic","MASH (PNPLA3-targeted)","Arrowhead","ARO-PNPLA3","Phase 2","PNPLA3","I148M RNAi silencing","Active STP — I148M genotyping mandatory"],
+  ["Metabolic","MASH","Novo Nordisk","Semaglutide (ESSENCE trial)","Phase 3","PNPLA3","Risk variant (biomarker subgroup)","Potential"],
+  ["Metabolic","Monogenic Obesity","Rhythm Pharmaceuticals","Imcivree (setmelanotide)","Commercial","MC4R / POMC / PCSK1 / LEPR","Loss-of-function variant","Active STP — Uncovering Rare Obesity panel; label-required CDx"],
+  ["Metabolic","Obesity / GLP-1 Response","Novo Nordisk","Wegovy (semaglutide)","Commercial","MC4R / FTO / polygenic BMI PRS","Risk variant / polygenic","Potential — pharmacogenomic research ongoing"],
+  ["Metabolic","Obesity / GLP-1 Response","Eli Lilly","Zepbound (tirzepatide)","Commercial","MC4R / FTO / polygenic BMI PRS","Risk variant / polygenic","Potential"],
+  // NEURODEGENERATIVE
+  ["Neurodegenerative","Alzheimer's Disease","Eisai / Biogen","Leqembi (lecanemab)","Commercial","APOE4","Risk variant (ARIA stratification)","Active STP — APOE4 genotyping recommended pre-treatment"],
+  ["Neurodegenerative","Alzheimer's Disease","Eli Lilly","Kisunla (donanemab)","Commercial","APOE4","Risk variant (dose-dependent ARIA risk)","Active STP — APOE4 genotyping for safety screening"],
+  ["Neurodegenerative","Parkinson's Disease","Biogen / Denali","BIIB122 (DNL151)","Phase 2/3","LRRK2","Pathogenic variant (G2019S)","Active STP — LRRK2 genotyping required for enrollment"],
+  ["Neurodegenerative","Parkinson's Disease","Eli Lilly","LY3819469","Phase 2","LRRK2","Pathogenic variant (G2019S)","Active STP — G2019S genotyping required"],
+  ["Neurodegenerative","Parkinson's Disease","Prevail / Eli Lilly","PR001 / LY3884963 (gene therapy)","Phase 1/2","GBA1","LOF pathogenic variant","Active STP — genetic testing required for enrollment"],
+  ["Neurodegenerative","ALS","Biogen","Qalsody (tofersen)","Commercial","SOD1","Pathogenic variant (100+ variants)","Active STP — SOD1 testing required; Biogen testing support program"],
+  ["Neurodegenerative","ALS","Wave Life Sciences / Takeda","WVE-004","Phase 1/2","C9orf72","Pathogenic repeat expansion","Active STP — repeat expansion testing required"],
+  ["Neurodegenerative","Huntington's Disease","Roche / Ionis","Tominersen","Phase 2/3","HTT","CAG repeat expansion (>36)","Active STP — CAG repeat testing required"],
+  ["Neurodegenerative","Huntington's Disease","uniQure","AMT-130","Phase 1/2","HTT","CAG repeat expansion","Active STP — CAG testing required"],
+  ["Neurodegenerative","SMA","Biogen","Spinraza (nusinersen)","Commercial","SMN1 / SMN2","Pathogenic variant + SMN2 copy number","Active STP — newborn screening support; testing programs"],
+  ["Neurodegenerative","SMA","Novartis","Zolgensma (onasemnogene)","Commercial","SMN1","Biallelic LOF (≤2 years)","Active STP — genetic confirmation required; access programs"],
+  ["Neurodegenerative","SMA","Roche / PTC","Evrysdi (risdiplam)","Commercial","SMN1 / SMN2","Pathogenic variant + copy number","Active STP — genetic testing required"],
+  ["Neurodegenerative","Friedreich's Ataxia","Reata / Biogen","Skyclarys (omaveloxolone)","Commercial","FXN","GAA repeat expansion","Active STP — FXN GAA repeat testing required"],
+  // INI / AUTOIMMUNE
+  ["INI / Autoimmune","Systemic Lupus Erythematosus","AstraZeneca","Saphnelo (anifrolumab)","Commercial","IFNAR1 / IFN signature","High IFN type I signature (risk)","Active STP — IFN gene signature test in TULIP trials"],
+  ["INI / Autoimmune","SLE (interferonopathy)","Pipeline","JAK inhibitors (trials)","Phase 2","TREX1","LOF pathogenic variant (monogenic SLE)","Active STP — genetic confirmation required in trials"],
+  ["INI / Autoimmune","Atopic Dermatitis","Sanofi / Regeneron","Dupixent (dupilumab)","Commercial","IL4RA / FLG","LOF (FLG); pathway target (IL4RA)","Strong Candidate — FLG LOF predicts barrier dysfunction"],
+  ["INI / Autoimmune","Atopic Dermatitis","AbbVie","Rinvoq (upadacitinib)","Commercial","JAK1 / FLG","Target (JAK1); LOF (FLG)","Potential"],
+  ["INI / Autoimmune","Atopic Dermatitis","Pfizer","Cibinqo (abrocitinib)","Commercial","JAK1 / FLG","Target (JAK1); LOF (FLG)","Potential"],
+  ["INI / Autoimmune","IBD / Crohn's Disease","AbbVie","Skyrizi (risankizumab)","Commercial","NOD2 / IL23R","Risk variant (GWAS loci)","Potential — IL23R genetics relevant to pathway"],
+  ["INI / Autoimmune","Myasthenia Gravis","argenx","Vyvgart (efgartigimod)","Commercial","FCGRT / AChR+ status","Biomarker-driven (AChR+); FcRn pathway target","Active STP — AChR+ status required; testing supported"],
+  ["INI / Autoimmune","Psoriasis","Novartis","Cosentyx (secukinumab)","Commercial","HLA-C*06:02 / IL17A","Risk variant (HLA)","Potential — HLA-C*06:02 used in research"],
+  // KIDNEY
+  ["Kidney","IgA Nephropathy","Calliditas / Pharmos","Tarpeyo (budesonide)","Commercial","TNFSF13B (APRIL)","Risk variant / gene duplication","Potential — no genetic CDx currently"],
+  ["Kidney","IgA Nephropathy","Chinook / Novartis","Zigakibart (BION-1301)","Phase 3","TNFSF13B","Risk variant / APRIL pathway","Potential — genetic stratification in development"],
+  ["Kidney","FSGS / APOL1-mediated KD","Vertex","Inaxaplin (VX-147)","Phase 3","APOL1","High-risk genotype (G1/G1; G1/G2; G2/G2)","Active STP — APOL1 genotyping required; genotype-first trial"],
+  ["Kidney","APOL1-mediated Kidney Disease","Ionis","ION532","Phase 2","APOL1","High-risk genotype (G1/G2) — ASO targeting","Active STP — APOL1 genotyping required"],
+  ["Kidney","ADPKD","Otsuka","Jynarque (tolvaptan)","Commercial","PKD1 / PKD2","Pathogenic variant (autosomal dominant)","Active STP — PKD1/PKD2 testing; Otsuka patient programs"],
+  ["Kidney","Fabry Disease","Amicus","Galafold (migalastat)","Commercial","GLA","Amenable missense variants (FDA CDx)","Active STP — FDA-approved CDx; amenability testing mandatory"],
+  ["Kidney","Fabry Disease","Sanofi / Genzyme","Fabrazyme (agalsidase beta)","Commercial","GLA","Pathogenic variant (X-linked LOF)","Active STP — GLA testing required; family screening programs"],
+  ["Kidney","Primary Hyperoxaluria Type 1","Alnylam","Oxlumo (lumasiran)","Commercial","AGXT","Pathogenic variant (LOF)","Active STP — AGXT genetic testing required"],
+  ["Kidney","Atypical HUS","Alexion / AstraZeneca","Ultomiris / Soliris","Commercial","CFH / CFI / C3 / CFB / CD46","Pathogenic variant (complement genes)","Active STP — complement gene panel; Alexion testing support"],
+  // LIVER
+  ["Liver","MASH","Madrigal","Rezdiffra (resmetirom)","Commercial","PNPLA3 / TM6SF2 / HSD17B13","Risk variants (I148M; E167K; splice)","Strong Candidate — genetic stratification post-approval"],
+  ["Liver","MASH (PNPLA3-specific)","Ionis","ION839","Phase 2","PNPLA3","I148M allele-specific ASO","Active STP — I148M genotyping required"],
+  ["Liver","MASH (PNPLA3-specific)","Arrowhead","ARO-PNPLA3","Phase 2","PNPLA3","I148M RNAi silencing","Active STP — I148M genotyping mandatory"],
+  ["Liver","Alpha-1 Antitrypsin Deficiency","Arrowhead","Fazirsiran (ARO-AAT)","Phase 3","SERPINA1","Pi*ZZ homozygous (LOF)","Active STP — Pi*ZZ genotyping required; Arrowhead testing support"],
+  ["Liver","Alpha-1 Antitrypsin Deficiency","Ionis","Belcesiran (ION065)","Phase 2/3","SERPINA1","Pi*ZZ (LOF)","Active STP — genetic testing required"],
+  ["Liver","Alpha-1 Antitrypsin Deficiency","Vertex","VX-864 / VX-634","Phase 2","SERPINA1","Pi*ZZ (LOF) — corrector approach","Active STP — ZZ genotype testing required"],
+  ["Liver","Primary Biliary Cholangitis","Ipsen / Genfit","Iqirvo (elafibranor)","Commercial","PPARD / HLA loci","Risk variant (GWAS)","Potential — no genetic CDx currently"],
+  ["Liver","Primary Biliary Cholangitis","Gilead / CymaBay","Livdelzi (seladelpar)","Commercial","PPARD / HLA loci","Risk variant (GWAS)","Potential"],
+  ["Liver","Wilson's Disease","Alexion / AstraZeneca","ALXN2075 / WTX101","Phase 2/3","ATP7B","LOF pathogenic variant (autosomal recessive)","Active STP — ATP7B genotyping standard; Alexion supports workup"],
+  ["Liver","Alagille Syndrome","Mirum","Livmarli (maralixibat)","Commercial","JAG1 / NOTCH2","Pathogenic variant (autosomal dominant)","Active STP — genetic diagnosis required; Mirum supports testing"],
+  ["Liver","Acute Hepatic Porphyria","Alnylam","Givlaari (givosiran)","Commercial","HMBS / ALAS1","LOF (HMBS); ALAS1 is therapeutic target","Active STP — HMBS genetic testing; Alnylam AHP program"],
+];
+
+const AREA_CLASS = {
+  "Cardiovascular":   "area-cardio",
+  "Metabolic":        "area-metabolic",
+  "Neurodegenerative":"area-neuro",
+  "INI / Autoimmune": "area-ini",
+  "Kidney":           "area-kidney",
+  "Liver":            "area-liver",
+};
+const DOT_CLASS = {
+  "Cardiovascular":   "dot-cardio",
+  "Metabolic":        "dot-metabolic",
+  "Neurodegenerative":"dot-neuro",
+  "INI / Autoimmune": "dot-ini",
+  "Kidney":           "dot-kidney",
+  "Liver":            "dot-liver",
+};
+
+function statusClass(s) {
+  if (s === "Commercial")       return "status-commercial";
+  if (s.includes("3") || s.includes("NDA")) return "status-phase3";
+  if (s.includes("2"))          return "status-phase2";
+  return "status-phase1";
+}
+function stpClass(s) {
+  if (s.startsWith("Active"))   return "stp-active";
+  if (s.startsWith("Strong"))   return "stp-strong";
+  return "stp-potential";
+}
+function stpLabel(s) {
+  if (s.startsWith("Active"))   return "● " + s;
+  if (s.startsWith("Strong"))   return "◎ " + s;
+  return "○ " + s;
+}
+
+// Populate filter dropdowns
+function populateFilters() {
+  const areas     = [...new Set(DATA.map(r=>r[0]))].sort();
+  const companies = [...new Set(DATA.map(r=>r[2]))].sort();
+  const areaEl = document.getElementById('f-area');
+  const compEl = document.getElementById('f-company');
+  areas.forEach(a     => { const o=document.createElement('option'); o.value=a; o.text=a; areaEl.add(o); });
+  companies.forEach(c => { const o=document.createElement('option'); o.value=c; o.text=c; compEl.add(o); });
+}
+
+let sortCol = -1, sortAsc = true;
+
+function render() {
+  const search  = document.getElementById('f-search').value.toLowerCase();
+  const area    = document.getElementById('f-area').value;
+  const company = document.getElementById('f-company').value;
+  const status  = document.getElementById('f-status').value;
+  const stp     = document.getElementById('f-stp').value;
+
+  let filtered = DATA.filter(r => {
+    const hay = r.join(' ').toLowerCase();
+    if (search  && !hay.includes(search))          return false;
+    if (area    && r[0] !== area)                  return false;
+    if (company && r[2] !== company)               return false;
+    if (status  && !r[4].includes(status.split(' ')[0])) return false;
+    if (stp     && !r[7].startsWith(stp))          return false;
+    return true;
+  });
+
+  if (sortCol >= 0) {
+    filtered.sort((a,b) => {
+      const av = a[sortCol], bv = b[sortCol];
+      return sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
+    });
+  }
+
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = '';
+
+  if (filtered.length === 0) {
+    document.getElementById('empty-state').style.display = 'block';
+    document.querySelector('.table-wrap table').style.display = 'none';
+  } else {
+    document.getElementById('empty-state').style.display = 'none';
+    document.querySelector('.table-wrap table').style.display = 'table';
+    filtered.forEach(r => {
+      const tr = document.createElement('tr');
+      // genes — split by / or ,
+      const geneTags = r[5].split(/\s*[\/,]\s*/).map(g =>
+        `<span class="gene-tag">${g.trim()}</span>`).join(' ');
+      tr.innerHTML = `
+        <td><span class="area-badge ${AREA_CLASS[r[0]]}"><span class="area-dot ${DOT_CLASS[r[0]]}"></span>${r[0]}</span></td>
+        <td>${r[1]}</td>
+        <td><span class="company-name">${r[2]}</span></td>
+        <td><span class="drug-name">${r[3]}</span></td>
+        <td><span class="status-badge ${statusClass(r[4])}">${r[4]}</span></td>
+        <td>${geneTags}</td>
+        <td><span class="type-text">${r[6]}</span></td>
+        <td><span class="${stpClass(r[7])}">${stpLabel(r[7])}</span></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Update counts
+  document.getElementById('showing-count').textContent = filtered.length;
+  document.getElementById('stat-total').textContent    = filtered.length;
+  document.getElementById('stat-active').textContent   = filtered.filter(r=>r[7].startsWith('Active')).length;
+  document.getElementById('stat-strong').textContent   = filtered.filter(r=>r[7].startsWith('Strong')).length;
+  const uniqueAreas     = new Set(filtered.map(r=>r[0])).size;
+  const uniqueCompanies = new Set(filtered.map(r=>r[2])).size;
+  document.getElementById('stat-areas').textContent    = uniqueAreas;
+  document.getElementById('stat-companies').textContent= uniqueCompanies;
+}
+
+function sortTable(col) {
+  if (sortCol === col) sortAsc = !sortAsc;
+  else { sortCol = col; sortAsc = true; }
+  document.querySelectorAll('thead th').forEach((th,i) => {
+    th.classList.toggle('sorted', i===col);
+    const icon = th.querySelector('.sort-icon');
+    if (icon) icon.textContent = i===col ? (sortAsc?'↑':'↓') : '↕';
+  });
+  render();
+}
+
+function resetFilters() {
+  document.getElementById('f-search').value  = '';
+  document.getElementById('f-area').value    = '';
+  document.getElementById('f-company').value = '';
+  document.getElementById('f-status').value  = '';
+  document.getElementById('f-stp').value     = '';
+  sortCol = -1; sortAsc = true;
+  document.querySelectorAll('thead th').forEach(th => {
+    th.classList.remove('sorted');
+    const icon = th.querySelector('.sort-icon');
+    if (icon) icon.textContent = '↕';
+  });
+  render();
+}
+
+// Event listeners
+['f-search','f-area','f-company','f-status','f-stp'].forEach(id => {
+  document.getElementById(id).addEventListener('input', render);
+  document.getElementById(id).addEventListener('change', render);
+});
+
+populateFilters();
+render();
+</script>
+</body>
+</html>
