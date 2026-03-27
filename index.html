@@ -327,18 +327,18 @@
     <table id="main-table">
       <thead>
         <tr>
-          <th onclick="sortTable(0)">Disease Area <span class="sort-icon">↕</span></th>
-          <th onclick="sortTable(1)">Indication <span class="sort-icon">↕</span></th>
-          <th onclick="sortTable(2)">Company <span class="sort-icon">↕</span></th>
-          <th onclick="sortTable(3)">Drug / Program <span class="sort-icon">↕</span></th>
-          <th onclick="sortTable(4)">US Status <span class="sort-icon">↕</span></th>
-          <th onclick="sortTable(5)">Genetic Target <span class="sort-icon">↕</span></th>
-          <th>Target Type</th>
-          <th onclick="sortTable(7)">STP Status <span class="sort-icon">↕</span></th>
-          <th onclick="sortTable(8)">Exome+ Support <span class="sort-icon">↕</span></th>
-          <th onclick="sortTable(9)">Dx Partner <span class="sort-icon">↕</span></th>
-          <th onclick="sortTable(10)">Helix Strategy <span class="sort-icon">↕</span></th>
-          <th>Reference</th>
+          <th onclick="sortTable(10)" data-col="10">Helix Strategy <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable(0)" data-col="0">Disease Area <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable(1)" data-col="1">Indication <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable(2)" data-col="2">Company <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable(3)" data-col="3">Drug / Program <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable(4)" data-col="4">US Status <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable(5)" data-col="5">Genetic Target <span class="sort-icon">↕</span></th>
+          <th data-col="6">Target Type</th>
+          <th onclick="sortTable(7)" data-col="7">STP Status <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable(8)" data-col="8">Exome+ Support <span class="sort-icon">↕</span></th>
+          <th onclick="sortTable(9)" data-col="9">Dx Partner <span class="sort-icon">↕</span></th>
+          <th data-col="11">Reference</th>
         </tr>
       </thead>
       <tbody id="table-body"></tbody>
@@ -580,6 +580,7 @@ function render() {
         ? `<a href="${r[11]}" target="_blank" rel="noopener" class="ref-link">View ↗</a>`
         : '—';
       tr.innerHTML = `
+        <td><span class="strat-badge ${stratClass(r[10])}">${stratLabel(r[10])}</span></td>
         <td><span class="area-badge ${AREA_CLASS[r[0]]||''}"><span class="area-dot ${DOT_CLASS[r[0]]||''}"></span>${r[0]}</span></td>
         <td>${r[1]}</td>
         <td><span class="company-name">${r[2]}</span></td>
@@ -590,7 +591,6 @@ function render() {
         <td><span class="${stpClass(r[7])}">${stpLabel(r[7])}</span></td>
         <td><span class="${exomeClass(r[8])}">${r[8]}</span></td>
         <td style="font-size:11.5px;color:var(--muted)">${r[9]||'—'}</td>
-        <td><span class="strat-badge ${stratClass(r[10])}">${stratLabel(r[10])}</span></td>
         <td>${refHtml}</td>
       `;
       tbody.appendChild(tr);
@@ -610,10 +610,11 @@ function render() {
 function sortTable(col) {
   if (sortCol === col) sortAsc = !sortAsc;
   else { sortCol = col; sortAsc = true; }
-  document.querySelectorAll('thead th').forEach((th,i) => {
-    th.classList.toggle('sorted', i===col);
+  document.querySelectorAll('thead th').forEach(th => {
+    const matched = parseInt(th.dataset.col) === col;
+    th.classList.toggle('sorted', matched);
     const icon = th.querySelector('.sort-icon');
-    if (icon) icon.textContent = i===col ? (sortAsc?'↑':'↓') : '↕';
+    if (icon) icon.textContent = matched ? (sortAsc?'↑':'↓') : '↕';
   });
   render();
 }
