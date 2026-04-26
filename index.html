@@ -42,14 +42,9 @@
     top: 0;
     z-index: 100;
   }
-  .logo { display: flex; align-items: center; gap: 10px; }
-  .logo-mark {
-    width: 32px; height: 32px; background: var(--navy);
-    border-radius: 8px; display: flex; align-items: center;
-    justify-content: center; font-weight: 900; color: #fff; font-size: 16px;
-  }
-  .logo-text { color: var(--navy); font-size: 17px; font-weight: 700; letter-spacing: 0.3px; }
-  .logo-sub  { color: var(--green); font-size: 12px; margin-left: 2px; font-weight: 500; }
+  .logo { display: flex; align-items: center; gap: 14px; }
+  .logo-img { height: 36px; width: auto; display: block; }
+  .logo-sub  { color: var(--green); font-size: 12px; font-weight: 600; }
   .header-tag {
     background: var(--green-10); color: var(--green);
     border: 1px solid rgba(67,156,57,0.28);
@@ -232,8 +227,8 @@
 
 <header>
   <div class="logo">
-    <div class="logo-mark">H</div>
-    <span class="logo-text">Helix <span class="logo-sub">GenoSphere™</span></span>
+    <img src="helix-logo.png" alt="Helix" class="logo-img">
+    <span class="logo-sub">GenoSphere™</span>
   </div>
   <div class="header-tag">US Sponsored Testing Landscape · 2026</div>
 </header>
